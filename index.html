@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head><meta charset="UTF-8"><title>Kosmiskais labirints</title>
+<style>
+body {margin: 0; background-color: #0b0c2a; color: white; font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center;}
+h1 {margin-top: 20px; font-size: 32px; color: #00f0ff; text-shadow: 0 0 10px #00f0ff;}
+#game-container {display: grid; grid-template-columns: repeat(15, 40px); grid-template-rows: repeat(10, 40px); gap: 2px; margin-top: 30px;}
+.cell {width: 40px; height: 40px; box-sizing: border-box;}
+.wall {background-color: #555577;}
+.path {background-color: #1a1c3f;}
+.player {background-color: #00ffea;}
+.end {background-color: #00ff00;}
+#start-button {margin-top: 20px; padding: 10px 20px; font-size: 18px; background-color: #008cff; color: white; border: none; cursor: pointer; border-radius: 5px;}
+#timer {margin-top: 15px; font-size: 20px;}
+#message {margin-top: 15px; font-size: 24px; color: #ff6666;}
+#author {margin-top: 30px; font-size: 14px; color: #888;}
+</style></head>
+<body>
+<h1>Kosmiskais labirints</h1>
+<button id="start-button">Start</button>
+<div id="timer">Laiks: 0s</div>
+<div id="game-container"></div>
+<div id="message"></div>
+<div id="author">(c) Varvara Grjazniha, 9.d, RIV</div>
+<script>
+const rows = 10, cols = 15;
+const container = document.getElementById("game-container"), timerDisplay = document.getElementById("timer"), message = document.getElementById("message"), startButton = document.getElementById("start-button");
+let maze = [
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+[1,0,1,0,0,0,0,0,0,1,0,1,0,2,1],
+[1,0,1,0,1,1,1,1,0,0,0,1,0,1,1],
+[1,0,1,0,0,0,0,0,1,1,0,1,0,0,1],
+[1,0,1,1,0,1,0,1,0,1,0,0,1,0,1],
+[1,0,0,1,0,1,0,0,0,0,1,0,1,0,1],
+[1,1,0,1,0,1,1,1,1,1,1,0,1,0,1],
+[1,1,0,1,0,0,0,1,0,0,1,0,0,0,1],
+[1,0,0,0,0,1,0,0,0,1,1,0,1,0,1],
+[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+];
+let playerPos = {x: 1, y: 1}, timer = 0, timerInterval = null, gameStarted = false;
+function drawMaze() {
+container.innerHTML = "";
+for (let y = 0; y < rows; y++) {
+for (let x = 0; x < cols; x++) {
+const cell = document.createElement("div");
+cell.classList.add("cell");
+if (maze[y][x] === 1) cell.classList.add("wall");
+else if (maze[y][x] === 2) cell.classList.add("end");
+else cell.classList.add("path");
+if (x === playerPos.x && y === playerPos.y) cell.classList.add("player");
+container.appendChild(cell);
+}}
+}
+function startGame() {
+message.textContent = "";
+playerPos = {x: 1, y: 1};
+drawMaze();
+timer = 0;
+timerDisplay.textContent = "Laiks: 0s";
+gameStarted = true;
+if (timerInterval) clearInterval(timerInterval);
+timerInterval = setInterval(() => {
+timer++;
+timerDisplay.textContent = `Laiks: ${timer}s`;
+}, 1000);
+}
+function move(dx, dy) {
+if (!gameStarted) return;
+const newX = playerPos.x + dx, newY = playerPos.y + dy;
+if (maze[newY][newX] === 1) {
+message.textContent = "Jūs ne izgājāt labirintu.";
+clearInterval(timerInterval);
+gameStarted = false;
+return;
+}
+playerPos = {x: newX, y: newY};
+drawMaze();
+if (maze[newY][newX] === 2) {
+clearInterval(timerInterval);
+message.textContent = `Jūs izgājāt labirintu! Laiks: ${timer}s`;
+gameStarted = false;
+}}
+document.addEventListener("keydown", (e) => {
+if (!gameStarted) return;
+switch (e.key) {
+case "ArrowUp": move(0, -1); break;
+case "ArrowDown": move(0, 1); break;
+case "ArrowLeft": move(-1, 0); break;
+case "ArrowRight": move(1, 0); break;
+}});
+startButton.addEventListener("click", startGame);
+drawMaze();
+</script>
+</body>
+</html>
